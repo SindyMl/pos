@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/constants.dart';
 
 class DashboardScreen extends StatelessWidget {
-  // Firestore instance
+  DashboardScreen({super.key});
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -29,7 +29,6 @@ class DashboardScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            // StreamBuilder for real-time data
             StreamBuilder(
               stream:
                   _firestore.collection('settings').doc('lowStock').snapshots(),
@@ -37,12 +36,10 @@ class DashboardScreen extends StatelessWidget {
                 context,
                 AsyncSnapshot<DocumentSnapshot> settingsSnapshot,
               ) {
-                // Handle settings (low stock threshold)
-                int lowStockThreshold = 10; // Default
+                int lowStockThreshold = 10;
                 if (settingsSnapshot.hasData && settingsSnapshot.data!.exists) {
                   lowStockThreshold = settingsSnapshot.data!['threshold'] ?? 10;
                 }
-
                 return StreamBuilder(
                   stream: _firestore.collection('sales').snapshots(),
                   builder: (
@@ -55,7 +52,6 @@ class DashboardScreen extends StatelessWidget {
                         context,
                         AsyncSnapshot<QuerySnapshot> inventorySnapshot,
                       ) {
-                        // Handle loading state
                         if (salesSnapshot.connectionState ==
                                 ConnectionState.waiting ||
                             inventorySnapshot.connectionState ==
@@ -66,8 +62,6 @@ class DashboardScreen extends StatelessWidget {
                             child: CircularProgressIndicator(),
                           );
                         }
-
-                        // Handle errors
                         if (salesSnapshot.hasError ||
                             inventorySnapshot.hasError ||
                             settingsSnapshot.hasError) {
@@ -78,8 +72,6 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           );
                         }
-
-                        // Process sales data
                         double todaySales = 0.0;
                         double dailyProfit = 0.0;
                         int pendingOrders = 0;
@@ -89,35 +81,28 @@ class DashboardScreen extends StatelessWidget {
                           now.month,
                           now.day,
                         );
-
                         for (var doc in salesSnapshot.data!.docs) {
                           final data = doc.data() as Map<String, dynamic>;
                           final timestamp =
                               (data['timestamp'] as Timestamp).toDate();
                           final total = data['total']?.toDouble() ?? 0.0;
-
                           if (timestamp.isAfter(todayStart)) {
                             todaySales += total;
-                            dailyProfit +=
-                                total *
-                                0.3; // Assume 30% profit margin (customize as needed)
+                            dailyProfit += total * 0.3;
                           }
                           if (data['status'] == 'pending') {
                             pendingOrders++;
                           }
                         }
-
-                        // Process inventory data
                         int lowStockCount = 0;
                         for (var doc in inventorySnapshot.data!.docs) {
                           final data = doc.data() as Map<String, dynamic>;
                           final quantity = data['quantity']?.toInt() ?? 0;
                           if (quantity < lowStockThreshold) {
+                            // Fixed: Changed 'lowStock' to 'lowStockThreshold'
                             lowStockCount++;
                           }
                         }
-
-                        // Display summary cards
                         return GridView.count(
                           crossAxisCount: 2,
                           shrinkWrap: true,
@@ -221,7 +206,6 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-// Reusable SummaryCard widget
 class SummaryCard extends StatelessWidget {
   final String title;
   final String value;

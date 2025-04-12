@@ -37,6 +37,7 @@ dependencies:
   hive: ^2.2.3               # Local storage for offline
   hive_flutter: ^1.1.0       # Hive Flutter integration
   fl_chart: ^0.70.2          # Charts for analytics
+  firebase_auth: ^5.3.1     # Firebase Authentication for user management
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
