@@ -212,8 +212,8 @@ class DashboardScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accentAmber,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+                        horizontal: 50,
+                        vertical: 25,
                       ),
                     ),
                     onPressed: () => Navigator.pushNamed(context, '/sales'),
@@ -223,8 +223,8 @@ class DashboardScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryTeal,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+                        horizontal: 50,
+                        vertical: 25,
                       ),
                     ),
                     onPressed: () => Navigator.pushNamed(context, '/inventory'),
