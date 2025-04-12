@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
-import '/dashboard.dart'; // Import your DashboardScreen
-import 'utils/constants.dart'; // Import your AppColors
+import '/dashboard.dart'; // Your DashboardScreen
+import 'utils/constants.dart'; // AppColors
 
 // Placeholder screens for navigation
 class SalesScreen extends StatelessWidget {
@@ -54,7 +52,6 @@ class SettingsScreen extends StatelessWidget {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   runApp(const MyApp());
 }
 

@@ -25,82 +25,128 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Welcome, User!',
+              'Welcome!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            StreamBuilder(
+            StreamBuilder<DocumentSnapshot>(
               stream:
                   _firestore.collection('settings').doc('lowStock').snapshots(),
               builder: (
                 context,
                 AsyncSnapshot<DocumentSnapshot> settingsSnapshot,
               ) {
+                if (settingsSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 int lowStockThreshold = 10;
                 if (settingsSnapshot.hasData && settingsSnapshot.data!.exists) {
-                  lowStockThreshold = settingsSnapshot.data!['threshold'] ?? 10;
+                  lowStockThreshold =
+                      settingsSnapshot.data!['threshold'] is int
+                          ? settingsSnapshot.data!['threshold'] as int
+                          : 10;
                 }
-                return StreamBuilder(
+                return StreamBuilder<QuerySnapshot>(
                   stream: _firestore.collection('sales').snapshots(),
                   builder: (
                     context,
                     AsyncSnapshot<QuerySnapshot> salesSnapshot,
                   ) {
-                    return StreamBuilder(
+                    if (salesSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return StreamBuilder<QuerySnapshot>(
                       stream: _firestore.collection('inventory').snapshots(),
                       builder: (
                         context,
                         AsyncSnapshot<QuerySnapshot> inventorySnapshot,
                       ) {
-                        if (salesSnapshot.connectionState ==
-                                ConnectionState.waiting ||
-                            inventorySnapshot.connectionState ==
-                                ConnectionState.waiting ||
-                            settingsSnapshot.connectionState ==
-                                ConnectionState.waiting) {
+                        if (inventorySnapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
                         }
-                        if (salesSnapshot.hasError ||
-                            inventorySnapshot.hasError ||
-                            settingsSnapshot.hasError) {
+                        // Handle errors
+                        if (salesSnapshot.hasError) {
+                          debugPrint('Sales error: ${salesSnapshot.error}');
                           return const Center(
                             child: Text(
-                              'Error loading data',
+                              'Error loading sales',
                               style: TextStyle(color: AppColors.alertRed),
                             ),
                           );
                         }
+                        if (inventorySnapshot.hasError) {
+                          debugPrint(
+                            'Inventory error: ${inventorySnapshot.error}',
+                          );
+                          return const Center(
+                            child: Text(
+                              'Error loading inventory',
+                              style: TextStyle(color: AppColors.alertRed),
+                            ),
+                          );
+                        }
+                        // Process sales
                         double todaySales = 0.0;
                         double dailyProfit = 0.0;
                         int pendingOrders = 0;
-                        final now = DateTime.now();
-                        final todayStart = DateTime(
-                          now.year,
-                          now.month,
-                          now.day,
-                        );
-                        for (var doc in salesSnapshot.data!.docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final timestamp =
-                              (data['timestamp'] as Timestamp).toDate();
-                          final total = data['total']?.toDouble() ?? 0.0;
-                          if (timestamp.isAfter(todayStart)) {
-                            todaySales += total;
-                            dailyProfit += total * 0.3;
-                          }
-                          if (data['status'] == 'pending') {
-                            pendingOrders++;
+                        if (salesSnapshot.hasData &&
+                            salesSnapshot.data!.docs.isNotEmpty) {
+                          final now = DateTime.now();
+                          final todayStart = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                          );
+                          for (var doc in salesSnapshot.data!.docs) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            try {
+                              final timestamp =
+                                  data['timestamp'] is Timestamp
+                                      ? (data['timestamp'] as Timestamp)
+                                          .toDate()
+                                      : DateTime.now();
+                              final total =
+                                  data['total'] is num
+                                      ? (data['total'] as num).toDouble()
+                                      : 0.0;
+                              final status =
+                                  data['status'] as String? ?? 'completed';
+                              if (timestamp.isAfter(todayStart)) {
+                                todaySales += total;
+                                dailyProfit += total * 0.3; // 30% profit margin
+                              }
+                              if (status == 'pending') {
+                                pendingOrders++;
+                              }
+                            } catch (e) {
+                              debugPrint('Error processing sale ${doc.id}: $e');
+                            }
                           }
                         }
+                        // Process inventory
                         int lowStockCount = 0;
-                        for (var doc in inventorySnapshot.data!.docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final quantity = data['quantity']?.toInt() ?? 0;
-                          if (quantity < lowStockThreshold) {
-                            // Fixed: Changed 'lowStock' to 'lowStockThreshold'
-                            lowStockCount++;
+                        if (inventorySnapshot.hasData &&
+                            inventorySnapshot.data!.docs.isNotEmpty) {
+                          for (var doc in inventorySnapshot.data!.docs) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            try {
+                              final quantity =
+                                  data['quantity'] is num
+                                      ? (data['quantity'] as num).toInt()
+                                      : 0;
+                              if (quantity < lowStockThreshold) {
+                                lowStockCount++;
+                              }
+                            } catch (e) {
+                              debugPrint(
+                                'Error processing inventory ${doc.id}: $e',
+                              );
+                            }
                           }
                         }
                         return GridView.count(
