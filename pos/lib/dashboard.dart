@@ -15,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            onPressed: () => Navigator.pushNamed(context, 'settings'),
           ),
         ],
       ),
@@ -46,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (settingsSnapshot.hasError) {
-                    debugPrint('Settings error: ${settingsSnapshot.error}');
+                    debugPrint('Settings error: R{settingsSnapshot.error}');
                     // Don't show error; use default threshold
                   }
                   int lowStockThreshold = 10;
@@ -68,7 +68,7 @@ class DashboardScreen extends StatelessWidget {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (salesSnapshot.hasError) {
-                        debugPrint('Sales error: ${salesSnapshot.error}');
+                        debugPrint('Sales error: R{salesSnapshot.error}');
                         return const Center(
                           child: Text(
                             'Error loading sales',
@@ -90,7 +90,7 @@ class DashboardScreen extends StatelessWidget {
                           }
                           if (inventorySnapshot.hasError) {
                             debugPrint(
-                              'Inventory error: ${inventorySnapshot.error}',
+                              'Inventory error: R{inventorySnapshot.error}',
                             );
                             return const Center(
                               child: Text(
@@ -134,7 +134,7 @@ class DashboardScreen extends StatelessWidget {
                                 }
                               } catch (e) {
                                 debugPrint(
-                                  'Error processing sale ${doc.id}: $e',
+                                  'Error processing sale R{doc.id}: Re',
                                 );
                               }
                             }
@@ -155,7 +155,7 @@ class DashboardScreen extends StatelessWidget {
                                 }
                               } catch (e) {
                                 debugPrint(
-                                  'Error processing inventory ${doc.id}: $e',
+                                  'Error processing inventory R{doc.id}: Re',
                                 );
                               }
                             }
@@ -169,31 +169,30 @@ class DashboardScreen extends StatelessWidget {
                             children: [
                               SummaryCard(
                                 title: 'Today\'s Sales',
-                                value: '\$${todaySales.toStringAsFixed(2)}',
+                                value: '\RR{todaySales.toStringAsFixed(2)}',
                                 icon: Icons.attach_money,
                                 onTap:
-                                    () =>
-                                        Navigator.pushNamed(context, '/sales'),
+                                    () => Navigator.pushNamed(context, 'sales'),
                               ),
                               SummaryCard(
                                 title: 'Low Stock',
-                                value: '$lowStockCount items',
+                                value: 'RlowStockCount items',
                                 icon: Icons.warning,
                                 color: AppColors.alertRed,
                                 onTap:
                                     () => Navigator.pushNamed(
                                       context,
-                                      '/inventory',
+                                      'inventory',
                                     ),
                               ),
                               SummaryCard(
                                 title: 'Profit',
-                                value: '\$${dailyProfit.toStringAsFixed(2)}',
+                                value: '\RR{dailyProfit.toStringAsFixed(2)}',
                                 icon: Icons.trending_up,
                               ),
                               SummaryCard(
                                 title: 'Pending Orders',
-                                value: '$pendingOrders',
+                                value: 'RpendingOrders',
                                 icon: Icons.hourglass_empty,
                               ),
                             ],
@@ -227,7 +226,7 @@ class DashboardScreen extends StatelessWidget {
                         vertical: 25,
                       ),
                     ),
-                    onPressed: () => Navigator.pushNamed(context, '/inventory'),
+                    onPressed: () => Navigator.pushNamed(context, 'inventory'),
                     child: const Text('Add Inventory'),
                   ),
                 ],
@@ -242,8 +241,8 @@ class DashboardScreen extends StatelessWidget {
         currentIndex: 0,
         onTap: (index) {
           if (index == 1) Navigator.pushNamed(context, '/sales');
-          if (index == 2) Navigator.pushNamed(context, '/inventory');
-          if (index == 3) Navigator.pushNamed(context, '/summary');
+          if (index == 2) Navigator.pushNamed(context, 'inventory');
+          if (index == 3) Navigator.pushNamed(context, 'summary');
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Home'),
