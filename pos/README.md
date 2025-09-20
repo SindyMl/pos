@@ -310,7 +310,7 @@ This project is proprietary and private. All rights reserved.
 ## 📞 Support
 
 For support and questions, please contact:
-- **Email**: [Your Email]
+- **Email**: chantymulondo@gmail.com
 - **GitHub**: [@SindyMl](https://github.com/SindyMl)
 
 ---
